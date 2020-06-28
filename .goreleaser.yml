@@ -1,0 +1,50 @@
+before:
+  hooks:
+    - go mod download
+    # you may remove this if you don't need go generate
+    - go generate ./...
+builds:
+  -
+    binary: test-foo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - arm
+      - arm64
+      - amd64
+    goarm:
+      - 6
+      - 7 
+    ignore:
+      - goos: darwin
+        goarch: arm
+      - goos: darwin
+        goarch: arm64
+      - goos: linux
+        goarch: amd64
+nfpms:
+  -
+    maintainer: Alex Howarth <alex.howarth@gmail.com>
+    license: "MIT"
+    formats:
+      - deb
+    files:
+      "debian/scripts/systemd/test-foo.service": "/etc/systemd/system/test-foo.service"
+    config_files:
+      "debian/conf/test-foo.conf": "/etc/test-foo.conf"
+    scripts:
+      postinstall: debian/scripts/postinstall.sh
+      preremove: debian/scripts/preremove.sh
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
